@@ -1,0 +1,52 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User account information and workspace settings",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "firstName": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "profile": { "type": "object" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Complaint": {
+      "title": "Complaint Case",
+      "description": "Uploaded or pasted customer complaints and drafted responses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "customerName": { "type": "string" },
+        "source": { "type": "string" },
+        "text": { "type": "string" },
+        "receivedAt": { "type": "string", "format": "date-time" },
+        "status": { "type": "string" },
+        "summary": { "type": "string" },
+        "coreNeed": { "type": "string" },
+        "customerMood": { "type": "string" },
+        "severity": { "type": "integer" },
+        "suggestedRemedy": { "type": "string" },
+        "remedyRationale": { "type": "string" },
+        "selectedRemedy": { "type": "string" },
+        "replyTone": { "type": "string" },
+        "replyDraft": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "followUps": { "type": "array" }
+      },
+      "required": ["id", "customerName", "source", "text", "receivedAt", "status"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Information about registered TurnAround businesses"
+    },
+    "/users/{userId}/complaints/{complaintId}": {
+      "schema": "Complaint",
+      "description": "Customer complaints and drafts logged for each business"
+    }
+  }
+}
