@@ -41,8 +41,7 @@ import {
   deleteFileFromStorage
 } from "./utils/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-
-const logoImg = "/src/assets/images/turnaround_logo_1781464067905.jpg";
+import logoImg from "./assets/images/turnaround_logo_1781464067905.jpg";
 
 export default function App() {
   // 1. Session State
@@ -961,10 +960,59 @@ export default function App() {
                         </span>
                       </div>
 
-                      {/* Micro date marker */}
-                      <span className="text-[9px] font-mono text-white/30 truncate max-w-[65px]">
-                        {new Date(c.receivedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                      </span>
+                      {/* Micro date marker & delete button / confirmation */}
+                      {confirmDeleteId === c.id ? (
+                        <div className="flex items-center gap-1.5 bg-red-950/40 border border-red-500/20 px-1.5 py-0.5 rounded shrink-0 animate-fadeIn" id={`card-confirm-${c.id}`}>
+                          <span className="text-[9px] text-red-300 font-mono font-medium">Delete?</span>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const updated = complaints.filter((item) => item.id !== c.id);
+                              updateComplaintsList(updated);
+                              if (selectedId === c.id) {
+                                if (updated.length > 0) {
+                                  setSelectedId(updated[0].id);
+                                } else {
+                                  setSelectedId(null);
+                                }
+                              }
+                              setConfirmDeleteId(null);
+                            }}
+                            className="bg-red-500 hover:bg-red-600 text-white text-[9px] font-bold py-0.5 px-1.5 rounded cursor-pointer"
+                            id={`card-del-yes-${c.id}`}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmDeleteId(null);
+                            }}
+                            className="bg-slate-800 text-slate-350 hover:bg-slate-700 text-[9px] py-0.5 px-1.5 rounded cursor-pointer"
+                            id={`card-del-no-${c.id}`}
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 shrink-0">
+                          <span className="text-[9px] font-mono text-white/30 truncate">
+                            {new Date(c.receivedAt).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
+                          </span>
+                          
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setConfirmDeleteId(c.id);
+                            }}
+                            className="text-white/20 hover:text-red-400 p-1 hover:bg-red-500/10 rounded transition-colors cursor-pointer"
+                            title="Delete Case"
+                            id={`card-del-trigger-${c.id}`}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -1043,25 +1091,59 @@ export default function App() {
                 </div>
 
                 {/* THE SIGNATURE RECOVERY ARC DISPLAY */}
-                <div className="text-left sm:text-right shrink-0" id="detail-recovery-arc-group">
-                  <p className="text-[10px] uppercase tracking-widest text-[#E0E2E8]/40 mb-2 font-mono">
-                    Recovery Arc
-                  </p>
-                  <div className="flex flex-col items-start sm:items-end">
-                    <RecoveryArc status={activeComplaint.status} size="lg" />
-                    <span className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${
-                      activeComplaint.status === "Recovered"
-                        ? "text-[#5F826B]"
-                        : activeComplaint.status === "In Progress"
-                        ? "text-[#D97706]"
-                        : "text-[#A66E61]"
-                    }`} id="detail-recovery-status-label">
-                      {activeComplaint.status === "Recovered"
-                        ? "Customer Recovery Achieved"
-                        : activeComplaint.status === "In Progress"
-                        ? "Developing Response"
-                        : "Awaiting Action Plan"}
-                    </span>
+                <div className="text-left sm:text-right shrink-0 flex flex-col items-start sm:items-end gap-2" id="detail-recovery-arc-group">
+                  <div>
+                    <p className="text-[10px] uppercase tracking-widest text-[#E0E2E8]/40 mb-2 font-mono">
+                      Recovery Arc
+                    </p>
+                    <div className="flex flex-col items-start sm:items-end">
+                      <RecoveryArc status={activeComplaint.status} size="lg" />
+                      <span className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${
+                        activeComplaint.status === "Recovered"
+                          ? "text-[#5F826B]"
+                          : activeComplaint.status === "In Progress"
+                          ? "text-[#D97706]"
+                          : "text-[#A66E61]"
+                      }`} id="detail-recovery-status-label">
+                        {activeComplaint.status === "Recovered"
+                          ? "Customer Recovery Achieved"
+                          : activeComplaint.status === "In Progress"
+                          ? "Developing Response"
+                          : "Awaiting Action Plan"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Header Quick-Delete button */}
+                  <div className="mt-1 w-full sm:w-auto" id="header-delete-module">
+                    {confirmDeleteId === activeComplaint.id ? (
+                      <div className="flex items-center gap-1.5 bg-red-950/40 border border-red-500/20 px-2.5 py-1 rounded-lg" id="top-delete-confirmation">
+                        <span className="text-[10px] text-red-300 font-mono">Confirm Delete?</span>
+                        <button
+                          onClick={deleteActiveComplaint}
+                          className="bg-red-500 hover:bg-red-600 text-white font-semibold text-[10px] px-2 py-0.5 rounded cursor-pointer transition"
+                          id="top-confirm-delete-btn"
+                        >
+                          Yes, Delete
+                        </button>
+                        <button
+                          onClick={() => setConfirmDeleteId(null)}
+                          className="bg-slate-800 text-slate-350 hover:bg-slate-700 text-[10px] px-2 py-0.5 rounded cursor-pointer transition"
+                          id="top-cancel-delete-btn"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => setConfirmDeleteId(activeComplaint.id)}
+                        className="text-white/40 hover:text-red-400 hover:bg-red-500/10 flex items-center justify-center sm:justify-end gap-1.5 text-[10px] uppercase font-bold tracking-wider py-1 px-2.5 rounded border border-white/5 hover:border-red-500/20 transition cursor-pointer w-full sm:w-auto"
+                        id="top-delete-complaint-btn"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                        <span>Delete Case</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>

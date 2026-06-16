@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { ArrowRight, Building2, Trash2, Mail, User } from "lucide-react";
 import { getAllWorkspacesList, deleteWorkspaceFromDevice } from "../utils/storage";
-
-const logoImg = "/src/assets/images/turnaround_logo_1781464067905.jpg";
+import logoImg from "../assets/images/turnaround_logo_1781464067905.jpg";
 
 interface SignInProps {
   onSignIn: (email: string, passwordText?: string, firstName?: string, isSignUp?: boolean) => void | Promise<void>;
